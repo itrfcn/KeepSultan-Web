@@ -1,0 +1,10 @@
+__pycache__/
+build/
+dist/
+KeepSultan/
+.keepsultan_cache/
+.venv/
+KeepSultan.zip
+KeepSultan.spec
+KeepSultanGUI.spec
+save.png

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeepSultan - 生成Keep跑步截图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 8px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="time"],
+        input[type="date"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        input[type="file"] {
+            padding: 3px;
+        }
+        
+        .range-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .range-inputs .form-group {
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #229954;
+        }
+        
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .info-text {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .range-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .file-upload {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            border-radius: 4px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: #27ae60;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        /* 文件名显示样式 */
+        .filename-display {
+            margin-top: 5px;
+            padding: 5px 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 14px;
+            color: #333;
+            word-break: break-all;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* 重置按钮样式 */
+        .reset-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .reset-button:hover {
+            background-color: #c0392b;
+        }
+        
+        /* 公告区样式 */
+        .announcement {
+            background-color: #f39c12;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .announcement h3 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+        }
+        
+        .announcement p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>KeepSultan</h1>
+            <p class="subtitle">生成自定义的Keep跑步截图</p>
+        </header>
+        
+        <!-- 公告区 -->
+        <div class="announcement">
+            <h3>📢 重要公告</h3>
+            <p>1. 本项目仅供学习交流使用，请勿用于商业用途</p>
+            <p>2. 所有生成的图片数据仅保存在本地浏览器中，不会上传到服务器</p>
+            <p>3. 支持上传自定义图片，图片会转换为base64编码存储在本地</p>
+            <p>4. 网站会自动保存您的配置，刷新页面后无需重新设置</p>
+        </div>
+        
+        <div class="form-container">
+            <form action="/generate" method="post">
+                <!-- 隐藏字段，用于存储base64编码的图片 -->
+                <input type="hidden" name="template_base64" id="template_base64">
+                <input type="hidden" name="map_base64" id="map_base64">
+                <input type="hidden" name="avatar_base64" id="avatar_base64">
+                <input type="hidden" name="map_bg_base64" id="map_bg_base64">
+                <input type="hidden" name="map_mask_base64" id="map_mask_base64">
+                
+                <!-- 基本信息 -->
+                <div class="form-section">
+                    <h2>基本信息</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="username">用户名</label>
+                            <input type="text" id="username" name="username" placeholder="输入用户名">
+                        </div>
+                        <div class="form-group">
+                            <label for="date">日期</label>
+                            <input type="text" id="date" name="date" placeholder="格式：2023/01/01 或留空使用今天">
+                            <p class="info-text">留空将使用今天的日期</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="end_time">结束时间</label>
+                            <input type="time" id="end_time" name="end_time">
+                            <p class="info-text">留空将使用当前时间</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location">地点</label>
+                            <input type="text" id="location" name="location" placeholder="输入地点">
+                        </div>
+                        <div class="form-group">
+                            <label for="weather">天气</label>
+                            <input type="text" id="weather" name="weather" placeholder="输入天气">
+                            <p class="info-text">留空将自动获取</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">温度</label>
+                            <input type="text" id="temperature" name="temperature" placeholder="输入温度">
+                            <p class="info-text">留空将自动获取</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 运动数据范围 -->
+                <div class="form-section">
+                    <h2>运动数据范围</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="range-label">
+                                <span>总公里数</span>
+                                <span>公里</span>
+                            </label>
+                            <div class="range-inputs">
+                                <div class="form-group">
+                                    <input type="number" name="total_km_low" step="0.01" placeholder="最小值" value="3.04">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" name="total_km_high" step="0.01" placeholder="最大值" value="3.3">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="range-label">
+                                <span>运动时长</span>
+                                <span>HH:MM</span>
+                            </label>
+                            <div class="range-inputs">
+                                <div class="form-group">
+                                    <input type="time" name="sport_time_start" step="60" value="00:20:00">
+                                </div>
+                                <div class="form-group">
+                                    <input type="time" name="sport_time_end" step="60" value="00:23:00">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="range-label">
+                                <span>总时长</span>
+                                <span>HH:MM</span>
+                            </label>
+                            <div class="range-inputs">
+                                <div class="form-group">
+                                    <input type="time" name="total_time_start" step="60" value="00:34:00">
+                                </div>
+                                <div class="form-group">
+                                    <input type="time" name="total_time_end" step="60" value="00:39:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="range-label">
+                                <span>累计爬升</span>
+                                <span>米</span>
+                            </label>
+                            <div class="range-inputs">
+                                <div class="form-group">
+                                    <input type="number" name="cumulative_climb_low" placeholder="最小值" value="90">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" name="cumulative_climb_high" placeholder="最大值" value="96">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="range-label">
+                                <span>平均步频</span>
+                                <span>步/分钟</span>
+                            </label>
+                            <div class="range-inputs">
+                                <div class="form-group">
+                                    <input type="number" name="average_cadence_low" placeholder="最小值" value="76">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" name="average_cadence_high" placeholder="最大值" value="81">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="range-label">
+                                <span>运动负荷</span>
+                                <span>无单位</span>
+                            </label>
+                            <div class="range-inputs">
+                                <div class="form-group">
+                                    <input type="number" name="exercise_load_low" placeholder="最小值" value="48">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" name="exercise_load_high" placeholder="最大值" value="51">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 轨迹生成配置 -->
+                <div class="form-section">
+                    <h2>轨迹生成配置</h2>
+                    
+                    <!-- 地图文件上传 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="map_bg_path">地图背景图片</label>
+                            <input type="file" id="map_bg_path" name="map_bg_path" accept="image/*">
+                            <p class="info-text">用于生成轨迹的地图背景图片</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="map_mask_path">路径掩码图片</label>
+                            <input type="file" id="map_mask_path" name="map_mask_path" accept="image/*">
+                            <p class="info-text">用于生成轨迹的路径掩码图片</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 轨迹参数 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="track_thickness">轨迹线条厚度</label>
+                            <input type="number" id="track_thickness" name="track_thickness" min="1" max="50" value="12">
+                        </div>
+                        <div class="form-group">
+                            <label for="track_sample_rate">采样率</label>
+                            <input type="number" id="track_sample_rate" name="track_sample_rate" min="1" max="20" value="5">
+                            <p class="info-text">值越大速度越快，精度越低</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="track_max_steps">最大步数</label>
+                            <input type="number" id="track_max_steps" name="track_max_steps" min="100" max="10000" value="3000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="track_completion_threshold">完成度阈值</label>
+                            <input type="number" id="track_completion_threshold" name="track_completion_threshold" step="0.1" min="0.1" max="1.0" value="0.2">
+                            <p class="info-text">达到阈值后提前结束</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="track_target_length">目标路径长度</label>
+                            <input type="number" id="track_target_length" name="track_target_length" min="100" max="1000" value="400">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>轨迹颜色</label>
+                            <div style="display: flex; gap: 10px;">
+                                <div>
+                                    <label for="track_color_b">B:</label>
+                                    <input type="number" id="track_color_b" name="track_color_b" min="0" max="255" value="154">
+                                </div>
+                                <div>
+                                    <label for="track_color_g">G:</label>
+                                    <input type="number" id="track_color_g" name="track_color_g" min="0" max="255" value="201">
+                                </div>
+                                <div>
+                                    <label for="track_color_r">R:</label>
+                                    <input type="number" id="track_color_r" name="track_color_r" min="0" max="255" value="38">
+                                </div>
+                            </div>
+                            <p class="info-text">轨迹颜色的BGR值（蓝、绿、红）</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 文件上传 -->
+                <div class="form-section">
+                    <h2>文件上传（可选）</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="template">模板图片</label>
+                            <input type="file" id="template" name="template" accept="image/*">
+                            <div id="template_filename" class="filename-display"></div>
+                            <p class="info-text">留空使用默认模板</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="map">地图图片</label>
+                            <input type="file" id="map" name="map" accept="image/*">
+                            <div id="map_filename" class="filename-display"></div>
+                            <p class="info-text">留空使用默认地图</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="avatar">头像图片</label>
+                            <input type="file" id="avatar" name="avatar" accept="image/*">
+                            <div id="avatar_filename" class="filename-display"></div>
+                            <p class="info-text">留空使用默认头像</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="map_bg_path">地图背景图片</label>
+                            <input type="file" id="map_bg_path" name="map_bg_path" accept="image/*">
+                            <div id="map_bg_path_filename" class="filename-display"></div>
+                            <p class="info-text">留空使用默认背景</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="map_mask_path">路径掩码图片</label>
+                            <input type="file" id="map_mask_path" name="map_mask_path" accept="image/*">
+                            <div id="map_mask_path_filename" class="filename-display"></div>
+                            <p class="info-text">留空使用默认掩码</p>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button type="button" id="reset_files" class="reset-button">重置所有文件选择</button>
+                    </div>
+                </div>
+                
+                <!-- 生成按钮 -->
+                <div class="button-container">
+                    <button type="submit">生成图片</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 需要缓存的字段列表
+        const cachedFields = [
+            // 基本信息
+            'username', 'location',
+            
+            // 运动数据范围
+            'total_km_low', 'total_km_high',
+            'sport_time_start', 'sport_time_end',
+            'total_time_start', 'total_time_end',
+            'cumulative_climb_low', 'cumulative_climb_high',
+            'average_cadence_low', 'average_cadence_high',
+            'exercise_load_low', 'exercise_load_high',
+            
+            // 轨迹生成配置
+            'track_thickness', 'track_sample_rate', 'track_max_steps',
+            'track_completion_threshold', 'track_target_length',
+            'track_color_b', 'track_color_g', 'track_color_r'
+        ];
+        
+        // 页面加载时，从localStorage读取并填充表单
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，开始读取缓存...');
+            // 遍历所有需要缓存的字段
+            cachedFields.forEach(fieldName => {
+                const inputElement = document.querySelector(`[name="${fieldName}"]`);
+                if (inputElement) {
+                    // 读取localStorage中的数据
+                    const savedValue = localStorage.getItem(`keepsultan_${fieldName}`);
+                    if (savedValue) {
+                        console.log(`从缓存中读取到${fieldName}的值：${savedValue}`);
+                        inputElement.value = savedValue;
+                    }
+                }
+            });
+            
+            // 读取base64编码的图片数据
+            fileInputs.forEach(fileConfig => {
+                const savedBase64 = localStorage.getItem(`keepsultan_${fileConfig.base64InputId}`);
+                if (savedBase64) {
+                    console.log(`从缓存中读取到${fileConfig.base64InputId}的图片数据`);
+                    const base64Input = document.getElementById(fileConfig.base64InputId);
+                    if (base64Input) {
+                        base64Input.value = savedBase64;
+                    }
+                    
+                    // 更新文件名显示
+                    const filenameDisplay = document.getElementById(`${fileConfig.inputId}_filename`);
+                    if (filenameDisplay) {
+                        filenameDisplay.textContent = '已选择: 从缓存加载';
+                    }
+                }
+            });
+        });
+        
+        // 为所有需要缓存的字段添加事件监听器，保存到localStorage
+        cachedFields.forEach(fieldName => {
+            const inputElement = document.querySelector(`[name="${fieldName}"]`);
+            if (inputElement) {
+                // 使用input和change事件，确保所有输入都被捕获
+                inputElement.addEventListener('input', function(e) {
+                    localStorage.setItem(`keepsultan_${fieldName}`, e.target.value);
+                    console.log(`保存${fieldName}到缓存：${e.target.value}`);
+                });
+                
+                // 为下拉选择框等添加change事件
+                inputElement.addEventListener('change', function(e) {
+                    localStorage.setItem(`keepsultan_${fieldName}`, e.target.value);
+                    console.log(`保存${fieldName}到缓存（change事件）：${e.target.value}`);
+                });
+            }
+        });
+        
+        // 将文件转换为base64编码的函数
+        function fileToBase64(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                callback(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // 文件上传处理
+        const fileInputs = [
+            { inputId: 'template', base64InputId: 'template_base64' },
+            { inputId: 'map', base64InputId: 'map_base64' },
+            { inputId: 'avatar', base64InputId: 'avatar_base64' },
+            { inputId: 'map_bg_path', base64InputId: 'map_bg_base64' },
+            { inputId: 'map_mask_path', base64InputId: 'map_mask_base64' }
+        ];
+        
+        // 显示已选择的文件名并转换为base64
+        fileInputs.forEach(fileConfig => {
+            const inputElement = document.getElementById(fileConfig.inputId);
+            const filenameDisplay = document.getElementById(`${fileConfig.inputId}_filename`);
+            const base64Input = document.getElementById(fileConfig.base64InputId);
+            
+            if (inputElement && filenameDisplay) {
+                inputElement.addEventListener('change', function(e) {
+                    if (e.target.files.length > 0) {
+                        const file = e.target.files[0];
+                        filenameDisplay.textContent = `已选择: ${file.name}`;
+                        
+                        // 将文件转换为base64并存储到隐藏字段
+                        if (base64Input) {
+                            fileToBase64(file, function(base64Data) {
+                                base64Input.value = base64Data;
+                                // 将base64编码的图片数据保存到localStorage
+                                localStorage.setItem(`keepsultan_${fileConfig.base64InputId}`, base64Data);
+                                console.log(`将${fileConfig.base64InputId}的图片数据保存到缓存`);
+                            });
+                        }
+                    } else {
+                        filenameDisplay.textContent = '';
+                        if (base64Input) {
+                            base64Input.value = '';
+                            // 清除localStorage中的图片数据
+                            localStorage.removeItem(`keepsultan_${fileConfig.base64InputId}`);
+                            console.log(`清除${fileConfig.base64InputId}的图片数据缓存`);
+                        }
+                    }
+                });
+            }
+        });
+        
+        // 重置所有文件选择
+        document.getElementById('reset_files').addEventListener('click', function() {
+            fileInputs.forEach(fileConfig => {
+                const inputElement = document.getElementById(fileConfig.inputId);
+                const filenameDisplay = document.getElementById(`${fileConfig.inputId}_filename`);
+                const base64Input = document.getElementById(fileConfig.base64InputId);
+                
+                if (inputElement) {
+                    inputElement.value = '';
+                }
+                
+                if (filenameDisplay) {
+                    filenameDisplay.textContent = '';
+                }
+                
+                if (base64Input) {
+                    base64Input.value = '';
+                }
+                
+                // 清除localStorage中的图片数据
+                localStorage.removeItem(`keepsultan_${fileConfig.base64InputId}`);
+                console.log(`清除${fileConfig.base64InputId}的图片数据缓存`);
+            });
+            
+            alert('所有文件选择已重置');
+        });
+    </script>
+</body>
+</html>

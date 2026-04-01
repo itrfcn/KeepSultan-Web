@@ -1,0 +1,22 @@
+[project]
+name = "keepsultan-web"
+version = "0.1.0"
+description = "基于KeepSultan项目的Flask网页版本"
+authors = [{ name = "LynxFrost" }]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "flask>=2.3.0",
+    "pillow>=11.3.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.26.0",
+    "scipy>=1.11.0",
+]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.15.0",
+]
+
+[project.scripts]
+keep-sultan-web = "main:app.run"
