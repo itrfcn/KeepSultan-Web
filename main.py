@@ -52,9 +52,20 @@ def generate_image():
         
         if 'weather' in config_data and config_data['weather']:
             cfg.weather = config_data['weather']
+        else:
+            # 保持默认的 "auto" 值，这样会自动获取天气
+            cfg.weather = "auto"
         
         if 'temperature' in config_data and config_data['temperature']:
             cfg.temperature = config_data['temperature']
+        else:
+            # 保持默认的 "auto" 值，这样会自动获取温度
+            cfg.temperature = "auto"
+        
+        # 检查是否需要自动获取天气数据
+        if cfg.weather == "auto" or cfg.temperature == "auto":
+            from KeepSultan import fetch_weather_data
+            cfg.weather, cfg.temperature = fetch_weather_data(cfg.location)
         
         # 处理base64编码的图片
         base64_fields = {

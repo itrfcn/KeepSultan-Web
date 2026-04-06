@@ -541,6 +541,10 @@ class KeepSultanApp:
         # 轻微加 0.01，避免随机数取不到两位的情形
         total_km = round(float(total_km) + 0.01, 2) if isinstance(total_km, float) else total_km
 
+        # 检查并自动获取天气数据
+        if not self.cfg.weather or not self.cfg.temperature:
+            self.cfg.weather, self.cfg.temperature = fetch_weather_data(self.cfg.location)
+
         pace = self.calculate_pace(float(total_km), sport_time)
         cost = self.calculate_cost(total_time)
 
